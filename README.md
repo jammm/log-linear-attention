@@ -2,6 +2,13 @@
 
 ## Setup
 
+1. Clone the repository and its submodules:
+```bash
+git clone --recursive https://github.com/HanGuo97/log-linear-attention.git
+cd log-linear-attention
+```
+
+2. Install the package and its dependencies:
 ```bash
 pip install -e .
 pip install -e flame/
@@ -9,13 +16,18 @@ pip install -r flame/3rdparty/torchtitan/requirements.txt
 ```
 
 ## Data Preparation
-Modify the save path in `hattention/preprocess_data.py`, then run the following command to preprocess the data:
+
+1. Configure the data preprocessing:
+   - Open `hattention/preprocess_data.py`
+   - Modify the save path to your desired location
+
+2. Run the preprocessing script:
 ```bash
 python -m hattentions.preprocess_data
 ```
 
 > [!NOTE]
-> The data preprocessing step may take hours.
+> The data preprocessing step may take a while.
 
 ## Train
 
@@ -28,7 +40,11 @@ Then launch training!
 ```bash
 bash ../scripts/train_flame.sh --name [NAME] --config [CONFIG] --seed [--ac]
 ```
-The optional `--ac` flag is used to enable activation checkpointing. To specify `CONFIG`, use the name of the config file in `configs/flame/` but without the `.json` extension. Note that you will need to modify the absolute file-path in `scripts/train_flame.sh`.
+
+- `NAME`: Name for the experiment and save path
+- `CONFIG`: Name of the config file in `configs/flame/` (without .json extension)
+- `--ac`: Optional flag to enable activation checkpointing
 
 > [!NOTE]
-> The first step of training will compile the Triton kernels. This may take a while.
+> 1. Modify the absolute file paths in `scripts/train_flame.sh` to match your setup
+> 2. The first training step will compile Triton kernels, which may take several minutes

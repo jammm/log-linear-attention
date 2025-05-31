@@ -1,6 +1,6 @@
 # Log Linear Attention
 
-![Figure](figs/recurrent.pdf)
+![Figure](figs/recurrent.png)
 
 ## Setup
 

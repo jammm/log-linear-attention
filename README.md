@@ -14,7 +14,7 @@ Modify the save path in `hattention/preprocess_data.py`, then run the following 
 python -m hattentions.preprocess_data
 ```
 
-> **Note**
+> [!NOTE]
 > The data preprocessing step may take hours.
 
 # Train
@@ -30,5 +30,5 @@ bash ../scripts/train_flame.sh --name [NAME] --config [CONFIG] --seed [--ac]
 ```
 The optional `--ac` flag is used to enable activation checkpointing. To specify `CONFIG`, use the name of the config file in `configs/flame/` but without the `.json` extension. Note that you will need to modify the absolute file-path in `scripts/train_flame.sh`.
 
-> **Note**
+> [!NOTE]
 > The first step of training will compile the Triton kernels. This may take a while.

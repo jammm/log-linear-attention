@@ -17,11 +17,7 @@ pip install -r flame/3rdparty/torchtitan/requirements.txt
 
 ## Data Preparation
 
-1. Configure the data preprocessing:
-   - Open `hattention/preprocess_data.py`
-   - Modify the save path to your desired location
-
-2. Run the preprocessing script:
+To configure the data preprocessing, open `hattention/preprocess_data.py` and modify the save path to your desired location. Then run the preprocessing script:
 ```bash
 python -m hattentions.preprocess_data
 ```
@@ -43,6 +39,7 @@ bash ../scripts/train_flame.sh --name [NAME] --config [CONFIG] --seed [--ac]
 
 - `NAME`: Name for the experiment and save path
 - `CONFIG`: Name of the config file in `configs/flame/` (without .json extension)
+- `--seed`: creating a seed checkpoint before training
 - `--ac`: Optional flag to enable activation checkpointing
 
 > [!NOTE]

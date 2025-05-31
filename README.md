@@ -44,4 +44,4 @@ bash ../scripts/train_flame.sh --name [NAME] --config [CONFIG] --seed [--ac]
 
 > [!NOTE]
 > 1. Modify the absolute file paths in `scripts/train_flame.sh` to match your setup
-> 2. The first training step will compile Triton kernels, which may take several minutes
+> 2. The first training step will compile Triton kernels, which may take tens of minutes

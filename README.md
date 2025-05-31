@@ -1,6 +1,6 @@
-# log-linear-attention
+# Log Linear Attention
 
-# Setup
+## Setup
 
 ```bash
 pip install -e .
@@ -8,7 +8,7 @@ pip install -e flame/
 pip install -r flame/3rdparty/torchtitan/requirements.txt
 ```
 
-# Data Preparation
+## Data Preparation
 Modify the save path in `hattention/preprocess_data.py`, then run the following command to preprocess the data:
 ```bash
 python -m hattentions.preprocess_data
@@ -17,7 +17,7 @@ python -m hattentions.preprocess_data
 > [!NOTE]
 > The data preprocessing step may take hours.
 
-# Train
+## Train
 
 First, step into the training framework `flame/`
 ```bash

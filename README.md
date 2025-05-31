@@ -1,5 +1,7 @@
 # Log Linear Attention
 
+![Figure](figs/recurrent.pdf)
+
 ## Setup
 
 1. Clone the repository and its submodules:

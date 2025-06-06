@@ -17,6 +17,18 @@ from hattention.chunkwise_hgdn import (
     chunkwise_bwd as chunkwise_bwd_hgdn)
 
 
+def l2norm_and_scale_fwd(x: torch.Tensor, scale: float) -> torch.Tensor:
+    y = l2norm_fwd(x)
+    y = y * scale
+    return y
+
+
+def l2norm_and_scale_bwd(x: torch.Tensor, dy: torch.Tensor, scale: float) -> torch.Tensor:
+    dx = l2norm_bwd(x, dy)
+    dx = dx * scale
+    return dx
+
+
 class HAttentionFunction(torch.autograd.Function):
 
     @staticmethod
@@ -30,6 +42,7 @@ class HAttentionFunction(torch.autograd.Function):
         b: Optional[torch.Tensor],
         g: torch.Tensor,
         l: torch.Tensor,
+        scale: Optional[float],
         head_first: bool,
         level_base: int,
         htype: HType,
@@ -45,6 +58,8 @@ class HAttentionFunction(torch.autograd.Function):
             if htype != HType.WEAK:
                 raise NotImplementedError
             if use_qk_l2norm_in_kernel:
+                raise NotImplementedError
+            if scale is not None:
                 raise NotImplementedError
             o, g = parallel_fwd(  # type: ignore
                 q=q,
@@ -65,6 +80,8 @@ class HAttentionFunction(torch.autograd.Function):
             if chunk_sizes[0] != chunk_sizes[1]:
                 raise NotImplementedError
             if use_qk_l2norm_in_kernel:
+                raise NotImplementedError
+            if scale is not None:
                 raise NotImplementedError
             o, g, _ = chunkwise_fwd(  # type: ignore
                 q=q,
@@ -87,8 +104,10 @@ class HAttentionFunction(torch.autograd.Function):
                 raise NotImplementedError
             if not use_qk_l2norm_in_kernel:
                 raise NotImplementedError
+            if scale is None:
+                raise NotImplementedError
             g, o, Aw, Au, _ = chunkwise_fwd_hgdn(
-                q=l2norm_fwd(q),
+                q=l2norm_and_scale_fwd(q, scale=scale),
                 k=l2norm_fwd(k),
                 v=v,
                 b=b,
@@ -104,6 +123,7 @@ class HAttentionFunction(torch.autograd.Function):
             raise NotImplementedError
 
         ctx.save_for_backward(q, k, v, b, g, l, Aw, Au)
+        ctx.scale = scale
         ctx.dtype = g.dtype
         ctx.head_first = head_first
         ctx.level_base = level_base
@@ -132,6 +152,7 @@ class HAttentionFunction(torch.autograd.Function):
                None,
                None,
                None,
+               None,
                None]:
         q, k, v, b, g, l, Aw, Au = ctx.saved_tensors
 
@@ -141,6 +162,8 @@ class HAttentionFunction(torch.autograd.Function):
             if ctx.htype != HType.WEAK:
                 raise NotImplementedError
             if ctx.use_qk_l2norm_in_kernel:
+                raise NotImplementedError
+            if ctx.scale is not None:
                 raise NotImplementedError
             dq, dk, dv, dg, dl = parallel_bwd(  # type: ignore
                 q=q,
@@ -161,6 +184,8 @@ class HAttentionFunction(torch.autograd.Function):
                 raise NotImplementedError
             if ctx.use_qk_l2norm_in_kernel:
                 raise NotImplementedError
+            if ctx.scale is not None:
+                raise NotImplementedError
             dq, dk, dv, dg, dl = chunkwise_bwd(  # type: ignore
                 q=q,
                 k=k,
@@ -180,8 +205,10 @@ class HAttentionFunction(torch.autograd.Function):
                 raise NotImplementedError
             if not ctx.use_qk_l2norm_in_kernel:
                 raise NotImplementedError
+            if ctx.scale is None:
+                raise NotImplementedError
             dq, dk, dv, db, dg, dl = chunkwise_bwd_hgdn(  # type: ignore
-                q=l2norm_fwd(q),
+                q=l2norm_and_scale_fwd(q, scale=ctx.scale),
                 k=l2norm_fwd(k),
                 v=v,
                 b=b,
@@ -194,7 +221,7 @@ class HAttentionFunction(torch.autograd.Function):
                 level_base=ctx.level_base,
                 htype=ctx.htype,
                 chunk_size=ctx.chunk_sizes[0])
-            dq = l2norm_bwd(q, dq)
+            dq = l2norm_and_scale_bwd(q, dq, scale=ctx.scale)
             dk = l2norm_bwd(k, dk)
 
         else:
@@ -207,6 +234,7 @@ class HAttentionFunction(torch.autograd.Function):
             db.to(b) if b is not None else None,
             dg.to(ctx.dtype),
             dl.to(l),
+            None,
             None,
             None,
             None,
@@ -229,6 +257,7 @@ class HAttentionPrefillFunction(torch.autograd.Function):
         b: Optional[torch.Tensor],
         g: torch.Tensor,
         l: torch.Tensor,
+        scale: Optional[float],
         head_first: bool,
         level_base: int,
         htype: HType,
@@ -241,6 +270,8 @@ class HAttentionPrefillFunction(torch.autograd.Function):
             if b is not None:
                 raise ValueError
             if use_qk_l2norm_in_kernel:
+                raise NotImplementedError
+            if scale is not None:
                 raise NotImplementedError
             o, _, h = chunkwise_fwd(  # type: ignore
                 q=q,
@@ -259,8 +290,10 @@ class HAttentionPrefillFunction(torch.autograd.Function):
                 raise ValueError
             if not use_qk_l2norm_in_kernel:
                 raise NotImplementedError
+            if scale is None:
+                raise NotImplementedError
             _, o, _, _, h = chunkwise_fwd_hgdn(
-                q=l2norm_fwd(q),
+                q=l2norm_and_scale_fwd(q, scale=scale),
                 k=l2norm_fwd(k),
                 v=v,
                 b=b,
@@ -297,6 +330,7 @@ class HAttentionPrefillFunction(torch.autograd.Function):
                None,
                None,
                None,
+               None,
                None]:
         raise NotImplementedError
 
@@ -308,6 +342,7 @@ def hattention_kernel(
     b: Optional[torch.Tensor],
     g: torch.Tensor,
     l: torch.Tensor,
+    scale: Optional[float],
     head_first: bool,
     level_base: int,
     htype: HType,
@@ -327,6 +362,7 @@ def hattention_kernel(
         b,
         g,
         l,
+        scale,
         head_first,
         level_base,
         htype,
@@ -347,6 +383,7 @@ def postprocess_prefill_hstate_(
     b: Optional[torch.Tensor],
     g: torch.Tensor,
     l: torch.Tensor,
+    scale: Optional[float],
     head_first: bool,
     level_base: int,
     htype: HType,
@@ -362,8 +399,13 @@ def postprocess_prefill_hstate_(
         _, _, _, L = l.shape
 
     if use_qk_l2norm_in_kernel:
-        q = l2norm_fwd(q)
+        if scale is None:
+            raise NotImplementedError
+        q = l2norm_and_scale_fwd(q, scale=scale)
         k = l2norm_fwd(k)
+    else:
+        if scale is not None:
+            raise NotImplementedError
 
     # do not use grouping for the non-kernel part
     q = repeat(q, "b t g k -> b t (g h) k", g=G, h=H // G).contiguous()
@@ -430,6 +472,7 @@ def hattention_prefill(
     b: Optional[torch.Tensor],
     g: torch.Tensor,
     l: torch.Tensor,
+    scale: Optional[float],
     head_first: bool,
     level_base: int,
     htype: HType,
@@ -485,6 +528,7 @@ def hattention_prefill(
             b0,
             g0,
             l0,
+            scale,
             head_first,
             level_base,
             htype,
@@ -504,6 +548,7 @@ def hattention_prefill(
             b=b0,
             g=g0,
             l=l0,
+            scale=scale,
             head_first=head_first,
             level_base=level_base,
             htype=htype,
@@ -521,6 +566,7 @@ def hattention_prefill(
             b=b[:, t, ...] if b is not None else None,
             g=g[:, t, ...],
             l=l[:, t, ...],
+            scale=scale,
             level_base=level_base,
             htype=htype,
             hstruct=hstruct,
@@ -537,6 +583,7 @@ def hattention_step(
     b: Optional[torch.Tensor],
     g: torch.Tensor,
     l: torch.Tensor,
+    scale: Optional[float],
     level_base: int,
     htype: HType,
     hstruct: HStruct,
@@ -562,8 +609,13 @@ def hattention_step(
     _, H, _ = v.shape
 
     if use_qk_l2norm_in_kernel:
-        q = l2norm_fwd(q)
+        if scale is None:
+            raise NotImplementedError
+        q = l2norm_and_scale_fwd(q, scale=scale)
         k = l2norm_fwd(k)
+    else:
+        if scale is not None:
+            raise NotImplementedError
 
     q = repeat(q, "b g k -> b (g h) k", g=G, h=H // G).contiguous()
     k = repeat(k, "b g k -> b (g h) k", g=G, h=H // G).contiguous()

@@ -5,6 +5,7 @@ import warnings
 from typing import Optional
 
 import torch
+import click
 from einops import rearrange
 from hattention.base import HType, HStruct
 from hattention.recurrent import HState
@@ -12,6 +13,8 @@ from hattention.kernel import (
     hattention_step,
     hattention_kernel,
     hattention_prefill)
+
+SCALE_LAMBDA = True
 
 
 @torch.compiler.disable
@@ -62,15 +65,9 @@ def chunk_h_gated_delta_rule(
     if scale is None:
         scale = k.shape[-1] ** -0.5
 
-    # scaling `q` outside of the kernel for now
-    # https://github.com/fla-org/flash-linear-attention/blob/main/fla/ops/simple_gla/naive.py#L10
-    # https://github.com/fla-org/flash-linear-attention/blob/main/fla/ops/delta_rule/naive.py#L38
-    # https://github.com/fla-org/flash-linear-attention/blob/main/fla/ops/generalized_delta_rule/iplr/naive.py#L38
-    # 2025/05/10: We applied the scale before QK normalization, so the scale will be normalized. This
-    # is an intended effect. That being said, as the `l` is also applied as a scaling term, this is
-    # effectively using the `scale` but with the new `l^\prime = l / scale`. We are keeping this for
-    # backward compatibility, but we need to do the more proper one down the line.
-    q = q * scale
+    if SCALE_LAMBDA:
+        warnings.warn(click.style("[H-GDN] Scaling lambda", fg="yellow"))
+        l = l / scale
 
     if output_final_state is False:
         if initial_state is not None:
@@ -83,6 +80,7 @@ def chunk_h_gated_delta_rule(
             b=beta,
             g=g,
             l=l,
+            scale=scale,
             head_first=False,
             level_base=2,
             htype=HType.WEAK,
@@ -97,6 +95,7 @@ def chunk_h_gated_delta_rule(
             b=beta,
             g=g,
             l=l,
+            scale=scale,
             head_first=False,
             level_base=2,
             htype=HType.WEAK,
@@ -120,6 +119,7 @@ def chunk_h_gated_delta_rule(
             b=beta.squeeze(dim=1),
             g=g   .squeeze(dim=1),
             l=l   .squeeze(dim=1),
+            scale=scale,
             level_base=2,
             htype=HType.WEAK,
             hstruct=HStruct.GDELTA,

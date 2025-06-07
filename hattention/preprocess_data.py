@@ -42,4 +42,4 @@ def count_tokens(data_files: str, tokenizer_name: str, batch_size: int = 1000) -
 
 
 if __name__ == "__main__":
-    shard_with_streaming("/export/share/data/Long-Data-Collections-preprocessed")
+    shard_with_streaming("./Long-Data-Collections-preprocessed")

@@ -20,9 +20,9 @@ class HStruct(Enum):
 
 
 CACHED_LEVELS_MATRICES = {
-    (2048 , 2, HType.WEAK  , -1): "/export/share/experiments/20250202/llut/llut.length-2048.base-2.pth",
-    (16384, 2, HType.WEAK  , -1): "/export/share/experiments/20250202/llut/llut.length-16384.base-2.pth",
-    (16384, 2, HType.STRONG, -1): "/export/share/experiments/20250402/llut/llut.length-16384.base-2.strong.pth",
+    # (2048 , 2, HType.WEAK  , -1): "/export/share/experiments/20250202/llut/llut.length-2048.base-2.pth",
+    # (16384, 2, HType.WEAK  , -1): "/export/share/experiments/20250202/llut/llut.length-16384.base-2.pth",
+    # (16384, 2, HType.STRONG, -1): "/export/share/experiments/20250402/llut/llut.length-16384.base-2.strong.pth",
 }
 
 

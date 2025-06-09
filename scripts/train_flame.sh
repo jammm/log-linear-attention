@@ -46,7 +46,7 @@ echo "Creating seed checkpoint..."
 NNODE=1 NGPU=1 LOG_RANK=0 bash train.sh \
   --job.config_file flame/models/fla.toml \
   --job.dump_folder exp/${NAME} \
-  --model.config configs/${CONFIG}.json \
+  --model.config ../configs/flame/${CONFIG}.json \
   --model.tokenizer_path fla-hub/transformer-1.3B-100B \
   --training.batch_size 4 \
   --training.seq_len 16384 \
@@ -71,7 +71,7 @@ echo "Training..."
 NNODE=1 NGPU=1 LOG_RANK=0 bash train.sh \
   --job.config_file flame/models/fla.toml \
   --job.dump_folder exp/${NAME} \
-  --model.config configs/${CONFIG}.json \
+  --model.config ../configs/flame/${CONFIG}.json \
   --model.tokenizer_path fla-hub/transformer-1.3B-100B \
   --training.batch_size 4 \
   --training.seq_len 16384 \

@@ -31,15 +31,16 @@ from fla.modules import GatedMLP
 from fla.models.mamba2.modeling_mamba2 import (
     logger,
     RMSNorm,
+    RMSNormGated,
     Mamba2Cache,
     Mamba2Output,
     Mamba2CausalLMOutput,
     FusedCrossEntropyLoss,
     FusedLinearCrossEntropyLoss,
-    )
-from fla.modules.layernorm_gated import RMSNormGated
-from fla.layers.mamba2 import pad_tensor_by_size, is_fast_path_available
-from causal_conv1d import causal_conv1d_fn, causal_conv1d_update
+    causal_conv1d_fn,
+    causal_conv1d_update,
+    pad_tensor_by_size,
+    is_fast_path_available)
 
 from hattention.base import HType, HStruct, get_num_levels
 from hattention.recurrent import HState

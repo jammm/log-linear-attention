@@ -46,7 +46,7 @@ echo "Creating seed checkpoint..."
 NNODE=1 NGPU=1 LOG_RANK=0 bash train.sh \
   --job.config_file flame/models/fla.toml \
   --job.dump_folder exp/${NAME} \
-  --model.config /workspace/main/log-linear-attention/configs/flame/${CONFIG}.json \
+  --model.config configs/${CONFIG}.json \
   --model.tokenizer_path fla-hub/transformer-1.3B-100B \
   --training.batch_size 4 \
   --training.seq_len 16384 \
@@ -54,7 +54,10 @@ NNODE=1 NGPU=1 LOG_RANK=0 bash train.sh \
   --training.gradient_accumulation_steps 1 \
   --training.steps 95368 \
   --training.dataset arrow \
+  --training.data_dir ../Long-Data-Collections-preprocessed \
   --training.dataset_split train \
+  --training.data_files ../Long-Data-Collections-preprocessed/state.json \
+  --training.dataset_name generator \
   --activation_checkpoint.mode ${AC_MODE} \
   --activation_checkpoint.selective_ac_option 4 \
   --checkpoint.load_step -1 \
@@ -65,10 +68,10 @@ fi
 
 echo "Training..."
 
-NNODE=1 NGPU=8 LOG_RANK=0 bash train.sh \
+NNODE=1 NGPU=1 LOG_RANK=0 bash train.sh \
   --job.config_file flame/models/fla.toml \
   --job.dump_folder exp/${NAME} \
-  --model.config /workspace/main/log-linear-attention/configs/flame/${CONFIG}.json \
+  --model.config configs/${CONFIG}.json \
   --model.tokenizer_path fla-hub/transformer-1.3B-100B \
   --training.batch_size 4 \
   --training.seq_len 16384 \
@@ -76,8 +79,12 @@ NNODE=1 NGPU=8 LOG_RANK=0 bash train.sh \
   --training.gradient_accumulation_steps 1 \
   --training.steps 95368 \
   --training.dataset arrow \
+  --training.data_dir ../Long-Data-Collections-preprocessed \
   --training.dataset_split train \
+  --training.data_files ../Long-Data-Collections-preprocessed/state.json \
+  --training.dataset_name generator \
   --activation_checkpoint.mode ${AC_MODE} \
   --activation_checkpoint.selective_ac_option 4 \
   --checkpoint.load_step -1 \
-  --checkpoint.keep_latest_k 25
+  --checkpoint.keep_latest_k 25 \
+  --training.mixed_precision_param bfloat16

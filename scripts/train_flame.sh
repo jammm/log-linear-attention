@@ -87,4 +87,4 @@ NNODE=1 NGPU=1 LOG_RANK=0 bash train.sh \
   --activation_checkpoint.selective_ac_option 4 \
   --checkpoint.load_step -1 \
   --checkpoint.keep_latest_k 25 \
-  --training.mixed_precision_param bfloat16
+  --training.mixed_precision_param float32
